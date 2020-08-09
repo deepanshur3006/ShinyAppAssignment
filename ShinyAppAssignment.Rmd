@@ -1,0 +1,122 @@
+---
+title: "Shiny App Documentation"
+author: "Deepanshu Rustagi"
+date: "8/9/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+### Documentation
+This app is intended to plot two sets of random uniform numbers against each other.
+
+A sub-set of points selected from this plot is fit into a model and a regression line is added to the plot.
+
+First of all, the number of random numbers to be plotted in taken as an input from the user. The maximum input is 100 at this stage.
+
+Next the range of x and y values is taken.
+
+Using these 3 inputs, the random numbers are generated and plotted.
+
+Next, the user can select some points with their cursor. These points are then run thorugh the linear model function, lm. The fitted line is plotted on the graph. And the slope and intercept of this line are also displayed by the app.
+
+This is the formal documentation of this Shiny App.
+
+The app is hosted on Rstudio server using shinyapps.io at the following URL: https://deepanshur.shinyapps.io/shinyassignmentapp/
+
+The URL for the repository containing the ui.R and server.R code files along with this documentation file is: https://github.com/deepanshur3006/ShinyAppAssignment
+
+### Code for ui.R and server.R
+
+**ui.R**
+```{r eval=FALSE}
+library(webshot)
+library(shiny)
+shinyUI(fluidPage(
+    titlePanel("Interactive Shiny Application"),
+    sidebarLayout(
+        sidebarPanel(
+            numericInput("numeric", "How Many Random Numbers Should be Plotted? (Max 100)", 
+                         value = 20, min = 20, max = 100, step = 1),
+            sliderInput("sliderX", "Pick Minimum and Maximum X Values",
+                        -100, 100, value = c(-50, 50)),
+            sliderInput("sliderY", "Pick Minimum and Maximum Y Values",
+                        -100, 100, value = c(-50, 50)),
+           
+        ),
+        mainPanel(
+            plotOutput("plot1",brush = brushOpts(
+                id = "brush1")),
+            h3("Slope"),
+            textOutput("slopeOut"),
+            h3("Intercept"),
+            textOutput("intOut")
+            
+        )
+    )
+))
+```
+**server.R**
+```{r eval=FALSE}
+library(webshot)
+    library(shiny)
+    shinyServer(function(input, output) {
+        
+   
+    xlab<-'Random Numbers X Axis'
+    ylab<-'Random Numbers Y Axis'
+    main<-'Plot of Y and X Random Numbers'
+        
+    output$plot1 <-  renderPlot({
+          
+              number_of_points <- input$numeric
+              minX <- input$sliderX[1]
+              maxX <- input$sliderX[2]
+              minY <- input$sliderY[1]
+              maxY <- input$sliderY[2]
+              
+              
+              dataX <- runif(number_of_points, minX, maxX)
+              dataY <- runif(number_of_points, minY, maxY)
+              datadf<-data.frame(dataX,dataY)
+         
+              plot(datadf$dataX, datadf$dataY, xlab = xlab, ylab = ylab, main = main
+                   ,  xlim = c(-100, 100), ylim = c(-100, 100))
+              
+              if(!is.null(model())){
+                  abline(model(), col = "blue", lwd = 2)
+                    }
+         
+        })
+        
+       model <- reactive({
+          
+            brushed_data <- brushedPoints(datadf,input$brush1,
+                                          xvar = "dataX", yvar = "dataY")
+            if(nrow(brushed_data) < 2){
+                return(NULL)
+            }
+            lm(dataY~dataX, data = brushed_data)
+        })
+       
+        
+        output$slopeOut <- renderText({
+            if(is.null(model())){
+                "No Model Found"
+            } else {
+                model()[[1]][2]
+            }
+        })
+        
+        output$intOut <- renderText({
+            if(is.null(model())){
+                "No Model Found"
+            } else {
+                model()[[1]][1]
+            }
+        })
+        
+        
+    })
+```
+
+    
