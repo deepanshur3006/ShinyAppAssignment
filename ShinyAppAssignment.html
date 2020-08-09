@@ -390,22 +390,26 @@ shinyUI(fluidPage(
     titlePanel(&quot;Interactive Shiny Application&quot;),
     sidebarLayout(
         sidebarPanel(
+            h3('Choose how many random numbers you want plotted and their ranges.'),
             numericInput(&quot;numeric&quot;, &quot;How Many Random Numbers Should be Plotted? (Max 100)&quot;, 
                          value = 20, min = 20, max = 100, step = 1),
             sliderInput(&quot;sliderX&quot;, &quot;Pick Minimum and Maximum X Values&quot;,
                         -100, 100, value = c(-50, 50)),
             sliderInput(&quot;sliderY&quot;, &quot;Pick Minimum and Maximum Y Values&quot;,
                         -100, 100, value = c(-50, 50)),
-           
+            
         ),
         mainPanel(
+            h3('Plot output after calculation in Server. 
+               You can select certain ponts with cursor. Go on!'),
             plotOutput(&quot;plot1&quot;,brush = brushOpts(
                 id = &quot;brush1&quot;)),
+            h3('Slope and Intercept of the fitted line for the selected points.'),
             h3(&quot;Slope&quot;),
             textOutput(&quot;slopeOut&quot;),
             h3(&quot;Intercept&quot;),
-            textOutput(&quot;intOut&quot;)
-            
+            textOutput(&quot;intOut&quot;),
+            h3('Documentation for using app: https://rpubs.com/deepanshu_rustagi88/647435')
         )
     )
 ))</code></pre>
