@@ -399,9 +399,9 @@ shinyUI(fluidPage(
             h3('Here is some trivia!'),
             h3('MPG Values For Selected Cars'),
             plotOutput(&quot;plot1&quot;),
-            h3('Maximum Horse Power'),
+            h3('Maximum Horse Power (Gross HorsePower'),
             textOutput(&quot;maxhp&quot;),
-            h3(&quot;Maximum Weight&quot;),
+            h3(&quot;Maximum Weight (1000 lbs)&quot;),
             textOutput(&quot;maxwt&quot;),
             h3('Documentation for using app: https://rpubs.com/deepanshu_rustagi88/647435')
         )
@@ -425,7 +425,7 @@ shinyServer(function(input, output) {
     output$plot1 &lt;-  renderPlot({
         
         
-        plot(filterdata()$mpg,xlab = 'MPG Values', ylab = 'Indexes', 
+        plot(filterdata()$mpg,xlab = 'Indexes', ylab = 'MPG Values', 
         main = 'MPG of Cars Having Selected
                    Number of Cylinders')
         

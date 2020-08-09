@@ -3,8 +3,8 @@ title: "Shiny App Documentation"
 author: "Deepanshu Rustagi"
 date: "8/9/2020"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 ### Documentation
 This app is intended to present some insights from mtcars data when the user selects the number of cylinders - 4, 6 or 8.
@@ -41,9 +41,9 @@ shinyUI(fluidPage(
             h3('Here is some trivia!'),
             h3('MPG Values For Selected Cars'),
             plotOutput("plot1"),
-            h3('Maximum Horse Power'),
+            h3('Maximum Horse Power (Gross HorsePower'),
             textOutput("maxhp"),
-            h3("Maximum Weight"),
+            h3("Maximum Weight (1000 lbs)"),
             textOutput("maxwt"),
             h3('Documentation for using app: https://rpubs.com/deepanshu_rustagi88/647435')
         )
@@ -69,7 +69,7 @@ shinyServer(function(input, output) {
     output$plot1 <-  renderPlot({
         
         
-        plot(filterdata()$mpg,xlab = 'MPG Values', ylab = 'Indexes', 
+        plot(filterdata()$mpg,xlab = 'Indexes', ylab = 'MPG Values', 
         main = 'MPG of Cars Having Selected
                    Number of Cylinders')
         

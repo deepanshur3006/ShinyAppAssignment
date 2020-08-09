@@ -16,9 +16,9 @@ shinyUI(fluidPage(
             h3('Here is some trivia!'),
             h3('MPG Values For Selected Cars'),
             plotOutput("plot1"),
-            h3('Maximum Horse Power'),
+            h3('Maximum Horse Power (Gross HorsePower'),
             textOutput("maxhp"),
-            h3("Maximum Weight"),
+            h3("Maximum Weight (1000 lbs)"),
             textOutput("maxwt"),
             h3('Documentation for using app: https://rpubs.com/deepanshu_rustagi88/647435')
         )

@@ -15,7 +15,7 @@ shinyServer(function(input, output) {
     output$plot1 <-  renderPlot({
         
         
-        plot(filterdata()$mpg,xlab = 'MPG Values', ylab = 'Indexes', 
+        plot(filterdata()$mpg,xlab = 'Indexes', ylab = 'MPG Values', 
         main = 'MPG of Cars Having Selected
                    Number of Cylinders')
         
