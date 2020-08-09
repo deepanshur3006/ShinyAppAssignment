@@ -3,21 +3,15 @@ title: "Shiny App Documentation"
 author: "Deepanshu Rustagi"
 date: "8/9/2020"
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 ### Documentation
-This app is intended to plot two sets of random uniform numbers against each other.
+This app is intended to present some insights from mtcars data when the user selects the number of cylinders - 4, 6 or 8.
 
-A sub-set of points selected from this plot is fit into a model and a regression line is added to the plot.
+A plot of the the mpg variable for the filtered data set is plotted in an interactive manner.
 
-First of all, the number of random numbers to be plotted in taken as an input from the user. The maximum input is 100 at this stage.
-
-Next the range of x and y values is taken.
-
-Using these 3 inputs, the random numbers are generated and plotted.
-
-Next, the user can select some points with their cursor. These points are then run thorugh the linear model function, lm. The fitted line is plotted on the graph. And the slope and intercept of this line are also displayed by the app.
+Also, the maximum Horse Power and Weight for the selected cylinder number is also presented.
 
 This is the formal documentation of this Shiny App.
 
@@ -31,29 +25,26 @@ The URL for the repository containing the ui.R and server.R code files along wit
 ```{r eval=FALSE}
 library(webshot)
 library(shiny)
+library(dplyr)
+data(mtcars)
 shinyUI(fluidPage(
-    titlePanel("Interactive Shiny Application"),
+    titlePanel("Interesting mtcars Analysis"),
     sidebarLayout(
         sidebarPanel(
-            h3('Choose how many random numbers you want plotted and their ranges.'),
-            numericInput("numeric", "How Many Random Numbers Should be Plotted? (Max 100)", 
-                         value = 20, min = 20, max = 100, step = 1),
-            sliderInput("sliderX", "Pick Minimum and Maximum X Values",
-                        -100, 100, value = c(-50, 50)),
-            sliderInput("sliderY", "Pick Minimum and Maximum Y Values",
-                        -100, 100, value = c(-50, 50)),
+            h3('Choose the number of cylinders'),
+            radioButtons("cyl", "Number of Cylinders", 
+                         choices = c(4,6,8))
+            
             
         ),
         mainPanel(
-            h3('Plot output after calculation in Server. 
-               You can select certain ponts with cursor. Go on!'),
-            plotOutput("plot1",brush = brushOpts(
-                id = "brush1")),
-            h3('Slope and Intercept of the fitted line for the selected points.'),
-            h3("Slope"),
-            textOutput("slopeOut"),
-            h3("Intercept"),
-            textOutput("intOut"),
+            h3('Here is some trivia!'),
+            h3('MPG Values For Selected Cars'),
+            plotOutput("plot1"),
+            h3('Maximum Horse Power'),
+            textOutput("maxhp"),
+            h3("Maximum Weight"),
+            textOutput("maxwt"),
             h3('Documentation for using app: https://rpubs.com/deepanshu_rustagi88/647435')
         )
     )
@@ -62,65 +53,41 @@ shinyUI(fluidPage(
 **server.R**
 ```{r eval=FALSE}
 library(webshot)
-    library(shiny)
-    shinyServer(function(input, output) {
+library(shiny)
+library(dplyr)
+data(mtcars)
+shinyServer(function(input, output) {
+    
+    
+    filterdata<- reactive({
         
-   
-    xlab<-'Random Numbers X Axis'
-    ylab<-'Random Numbers Y Axis'
-    main<-'Plot of Y and X Random Numbers'
+        tempdf<- filter(mtcars,cyl==input$cyl)
         
+    }) 
+    
+    
     output$plot1 <-  renderPlot({
-          
-              number_of_points <- input$numeric
-              minX <- input$sliderX[1]
-              maxX <- input$sliderX[2]
-              minY <- input$sliderY[1]
-              maxY <- input$sliderY[2]
-              
-              
-              dataX <- runif(number_of_points, minX, maxX)
-              dataY <- runif(number_of_points, minY, maxY)
-              datadf<-data.frame(dataX,dataY)
-         
-              plot(datadf$dataX, datadf$dataY, xlab = xlab, ylab = ylab, main = main
-                   ,  xlim = c(-100, 100), ylim = c(-100, 100))
-              
-              if(!is.null(model())){
-                  abline(model(), col = "blue", lwd = 2)
-                    }
-         
-        })
         
-       model <- reactive({
-          
-            brushed_data <- brushedPoints(datadf,input$brush1,
-                                          xvar = "dataX", yvar = "dataY")
-            if(nrow(brushed_data) < 2){
-                return(NULL)
-            }
-            lm(dataY~dataX, data = brushed_data)
-        })
-       
         
-        output$slopeOut <- renderText({
-            if(is.null(model())){
-                "No Model Found"
-            } else {
-                model()[[1]][2]
-            }
-        })
-        
-        output$intOut <- renderText({
-            if(is.null(model())){
-                "No Model Found"
-            } else {
-                model()[[1]][1]
-            }
-        })
-        
+        plot(filterdata()$mpg,xlab = 'MPG Values', ylab = 'Indexes', 
+        main = 'MPG of Cars Having Selected
+                   Number of Cylinders')
         
     })
+    
+    output$maxhp <- renderText({
+        
+        max(filterdata()$hp) 
+        
+    })
+    
+    output$maxwt <- renderText({
+        max(filterdata()$wt)
+        
+    })
+    
+    
+})
 ```
 
     

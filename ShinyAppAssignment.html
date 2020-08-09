@@ -371,12 +371,9 @@ summary {
 
 <div id="documentation" class="section level3">
 <h3>Documentation</h3>
-<p>This app is intended to plot two sets of random uniform numbers against each other.</p>
-<p>A sub-set of points selected from this plot is fit into a model and a regression line is added to the plot.</p>
-<p>First of all, the number of random numbers to be plotted in taken as an input from the user. The maximum input is 100 at this stage.</p>
-<p>Next the range of x and y values is taken.</p>
-<p>Using these 3 inputs, the random numbers are generated and plotted.</p>
-<p>Next, the user can select some points with their cursor. These points are then run thorugh the linear model function, lm. The fitted line is plotted on the graph. And the slope and intercept of this line are also displayed by the app.</p>
+<p>This app is intended to present some insights from mtcars data when the user selects the number of cylinders - 4, 6 or 8.</p>
+<p>A plot of the the mpg variable for the filtered data set is plotted in an interactive manner.</p>
+<p>Also, the maximum Horse Power and Weight for the selected cylinder number is also presented.</p>
 <p>This is the formal documentation of this Shiny App.</p>
 <p>The app is hosted on Rstudio server using shinyapps.io at the following URL: <a href="https://deepanshur.shinyapps.io/shinyassignmentapp/" class="uri">https://deepanshur.shinyapps.io/shinyassignmentapp/</a></p>
 <p>The URL for the repository containing the ui.R and server.R code files along with this documentation file is: <a href="https://github.com/deepanshur3006/ShinyAppAssignment" class="uri">https://github.com/deepanshur3006/ShinyAppAssignment</a></p>
@@ -386,94 +383,67 @@ summary {
 <p><strong>ui.R</strong></p>
 <pre class="r"><code>library(webshot)
 library(shiny)
+library(dplyr)
+data(mtcars)
 shinyUI(fluidPage(
-    titlePanel(&quot;Interactive Shiny Application&quot;),
+    titlePanel(&quot;Interesting mtcars Analysis&quot;),
     sidebarLayout(
         sidebarPanel(
-            h3('Choose how many random numbers you want plotted and their ranges.'),
-            numericInput(&quot;numeric&quot;, &quot;How Many Random Numbers Should be Plotted? (Max 100)&quot;, 
-                         value = 20, min = 20, max = 100, step = 1),
-            sliderInput(&quot;sliderX&quot;, &quot;Pick Minimum and Maximum X Values&quot;,
-                        -100, 100, value = c(-50, 50)),
-            sliderInput(&quot;sliderY&quot;, &quot;Pick Minimum and Maximum Y Values&quot;,
-                        -100, 100, value = c(-50, 50)),
+            h3('Choose the number of cylinders'),
+            radioButtons(&quot;cyl&quot;, &quot;Number of Cylinders&quot;, 
+                         choices = c(4,6,8))
+            
             
         ),
         mainPanel(
-            h3('Plot output after calculation in Server. 
-               You can select certain ponts with cursor. Go on!'),
-            plotOutput(&quot;plot1&quot;,brush = brushOpts(
-                id = &quot;brush1&quot;)),
-            h3('Slope and Intercept of the fitted line for the selected points.'),
-            h3(&quot;Slope&quot;),
-            textOutput(&quot;slopeOut&quot;),
-            h3(&quot;Intercept&quot;),
-            textOutput(&quot;intOut&quot;),
+            h3('Here is some trivia!'),
+            h3('MPG Values For Selected Cars'),
+            plotOutput(&quot;plot1&quot;),
+            h3('Maximum Horse Power'),
+            textOutput(&quot;maxhp&quot;),
+            h3(&quot;Maximum Weight&quot;),
+            textOutput(&quot;maxwt&quot;),
             h3('Documentation for using app: https://rpubs.com/deepanshu_rustagi88/647435')
         )
     )
 ))</code></pre>
 <p><strong>server.R</strong></p>
 <pre class="r"><code>library(webshot)
-    library(shiny)
-    shinyServer(function(input, output) {
+library(shiny)
+library(dplyr)
+data(mtcars)
+shinyServer(function(input, output) {
+    
+    
+    filterdata&lt;- reactive({
         
-   
-    xlab&lt;-'Random Numbers X Axis'
-    ylab&lt;-'Random Numbers Y Axis'
-    main&lt;-'Plot of Y and X Random Numbers'
+        tempdf&lt;- filter(mtcars,cyl==input$cyl)
         
+    }) 
+    
+    
     output$plot1 &lt;-  renderPlot({
-          
-              number_of_points &lt;- input$numeric
-              minX &lt;- input$sliderX[1]
-              maxX &lt;- input$sliderX[2]
-              minY &lt;- input$sliderY[1]
-              maxY &lt;- input$sliderY[2]
-              
-              
-              dataX &lt;- runif(number_of_points, minX, maxX)
-              dataY &lt;- runif(number_of_points, minY, maxY)
-              datadf&lt;-data.frame(dataX,dataY)
-         
-              plot(datadf$dataX, datadf$dataY, xlab = xlab, ylab = ylab, main = main
-                   ,  xlim = c(-100, 100), ylim = c(-100, 100))
-              
-              if(!is.null(model())){
-                  abline(model(), col = &quot;blue&quot;, lwd = 2)
-                    }
-         
-        })
-        
-       model &lt;- reactive({
-          
-            brushed_data &lt;- brushedPoints(datadf,input$brush1,
-                                          xvar = &quot;dataX&quot;, yvar = &quot;dataY&quot;)
-            if(nrow(brushed_data) &lt; 2){
-                return(NULL)
-            }
-            lm(dataY~dataX, data = brushed_data)
-        })
-       
-        
-        output$slopeOut &lt;- renderText({
-            if(is.null(model())){
-                &quot;No Model Found&quot;
-            } else {
-                model()[[1]][2]
-            }
-        })
-        
-        output$intOut &lt;- renderText({
-            if(is.null(model())){
-                &quot;No Model Found&quot;
-            } else {
-                model()[[1]][1]
-            }
-        })
         
         
-    })</code></pre>
+        plot(filterdata()$mpg,xlab = 'MPG Values', ylab = 'Indexes', 
+        main = 'MPG of Cars Having Selected
+                   Number of Cylinders')
+        
+    })
+    
+    output$maxhp &lt;- renderText({
+        
+        max(filterdata()$hp) 
+        
+    })
+    
+    output$maxwt &lt;- renderText({
+        max(filterdata()$wt)
+        
+    })
+    
+    
+})</code></pre>
 </div>
 
 
